@@ -9,6 +9,10 @@ app.use(bodyParser.json());
 
 app.use('/api', aiRouter);
 
+app.get("/", (req, res) => {
+    return res.json({ hello: "world" });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
