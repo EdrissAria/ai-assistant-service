@@ -1,55 +1,46 @@
-import axios from 'axios';
-import fs from 'fs';
-import pdf from 'pdf-parse';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
+import axios from "axios";
+import fs from "fs";
+import pdf from "pdf-parse/lib/pdf-parse.js";
+import { v4 as uuidv4 }  from "uuid";
 
 const downloadAndParseFile = async (url, type) => {
-    const tempFileName = path.join('test', 'data', `download_${uuidv4()}.${type}`);
+  const tempFileName = `download_${uuidv4()}.${type}`;
 
-    try {
-        const response = await axios({
-            method: 'get',
-            url: url,
-            responseType: 'stream'
-        });
+  try {
+    const response = await axios({
+      method: "get",
+      url: url,
+      responseType: "stream",
+    });
 
-        if (response.status !== 200) {
-            throw new Error(`Failed to download file: ${response.statusText}`);
-        }
+    const writer = fs.createWriteStream(tempFileName);
+    response.data.pipe(writer);
 
-        const dir = path.dirname(tempFileName);
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir, { recursive: true });
-        }
+    await new Promise((resolve, reject) => {
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
 
-        const writer = fs.createWriteStream(tempFileName);
-        response.data.pipe(writer);
+    let dataBuffer = fs.readFileSync(tempFileName);
 
-        await new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-        });
-
-        let dataBuffer = fs.readFileSync(tempFileName);
-        let fileText;
-
-        if (type === 'pdf') {
-            const pdfData = await pdf(dataBuffer);
-            fileText = pdfData.text;
-        } else {
-            fileText = dataBuffer.toString();
-        }
-
-        fs.unlinkSync(tempFileName);
-        return fileText;
-    } catch (error) {
-        console.error('Error in downloadAndParseFile:', error.message);
-        if (fs.existsSync(tempFileName)) {
-            fs.unlinkSync(tempFileName);
-        }
-        throw error;
+    let fileText;
+    if (type === "pdf") {
+      const pdfData = await pdf(dataBuffer);
+      fileText = pdfData.text;
+    } else {
+      fileText = dataBuffer.toString();
     }
+
+    fs.unlinkSync(tempFileName);
+
+    return fileText;
+  } catch (error) {
+    console.error("Error reading file from URL:", error);
+    if (fs.existsSync(tempFileName)) {
+      fs.unlinkSync(tempFileName);
+    }
+    throw error;
+  }
 };
 
 export default downloadAndParseFile;

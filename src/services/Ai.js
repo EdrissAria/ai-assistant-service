@@ -40,7 +40,6 @@ class Ai {
       }
       product_doc += `\nThis product is available in these variants:\n${variants_doc}`;
 
-      // Process image
       let image_doc = 'Image:\n';
       if (product.image && product.image.src) {
         image_doc += `${product.image.src}\n`;
