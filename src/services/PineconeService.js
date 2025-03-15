@@ -28,7 +28,7 @@ class PineconeService {
           cloud: "aws",
           region: "us-east-1",
           embed: {
-            model: "llama-text-embed-v2",
+            model: "multilingual-e5-large",
             fieldMap: {
               text: "description",
             },
@@ -47,7 +47,7 @@ class PineconeService {
   async insertdata(data) {
     try {
       const index = await this.createIndex();
-
+      
       await index.upsertRecords(data);
 
       console.log("Data successfully imported to Pinecone.");
