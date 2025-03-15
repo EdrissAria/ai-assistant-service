@@ -28,7 +28,6 @@ class Ai {
     const vectorStore = await PineconeStore.fromExistingIndex(this.embeddings, {
       pineconeIndex,
       maxConcurrency: 5,
-      namespace: "OBEY Clothing"
     });
     
     const retriever = vectorStore.asRetriever({k:2});
@@ -45,7 +44,6 @@ class Ai {
     if (response?.response_metadata?.tokenUsage) {
       fs.writeFileSync("token_usage.log", JSON.stringify(response.response_metadata.tokenUsage));
     }
-    
 
   }  
 }
